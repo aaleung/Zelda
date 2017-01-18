@@ -24,7 +24,13 @@ public class PlayerController : MonoBehaviour {
     /* TODO: Deal with user-invoked movement of the player character */
     void ProcessMovement ()
     {
-        Vector3 desired_velocity = Vector3.zero;
+        
+
+
+
+
+
+        /*Vector3 desired_velocity = Vector3.zero;
 
         if (Input.GetKey(KeyCode.UpArrow))
             desired_velocity = new Vector3(0, 1, 0);
@@ -35,7 +41,7 @@ public class PlayerController : MonoBehaviour {
         else if (Input.GetKey(KeyCode.DownArrow))
             desired_velocity = Vector3.down;
 
-        rb.velocity = desired_velocity * PlayerMovementVelocity;
+        rb.velocity = desired_velocity * PlayerMovementVelocity;*/
 
         /* NOTE:
          * A reminder to study and implement the grid-movement mechanic.

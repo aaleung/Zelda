@@ -67,11 +67,11 @@ public class State
 // The state is capable of transitioning to a walking state upon key press.
 public class StateIdleWithSprite : State
 {
-	PlayerControl pc;
+	player_control pc;
 	SpriteRenderer renderer;
 	Sprite sprite;
 	
-	public StateIdleWithSprite(PlayerControl pc, SpriteRenderer renderer, Sprite sprite)
+	public StateIdleWithSprite(player_control pc, SpriteRenderer renderer, Sprite sprite)
 	{
 		this.pc = pc;
 		this.renderer = renderer;
@@ -88,15 +88,18 @@ public class StateIdleWithSprite : State
 		if(pc.current_state == EntityState.ATTACKING)
 			return;
 
-		// Transition to walking animations on key press.
-		if(Input.GetKeyDown(KeyCode.DownArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_down, 6, KeyCode.DownArrow));
-		if(Input.GetKeyDown(KeyCode.UpArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_up, 6, KeyCode.UpArrow));
-		if(Input.GetKeyDown(KeyCode.RightArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_right, 6, KeyCode.RightArrow));
-		if(Input.GetKeyDown(KeyCode.LeftArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_left, 6, KeyCode.LeftArrow));
+        // Transition to walking animations on key press.
+        if (pc.current_direction == Direction.SOUTH)
+        {
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_down, 6, KeyCode.DownArrow));
+            //Debug.Log("Key pressed; transition to walking down");
+        }
+        if (pc.current_direction == Direction.NORTH)
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_up, 6, KeyCode.UpArrow));
+        if (pc.current_direction == Direction.EAST)
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_right, 6, KeyCode.RightArrow));
+        if (pc.current_direction == Direction.WEST)
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_left, 6, KeyCode.LeftArrow));
 	}
 }
 
@@ -104,7 +107,7 @@ public class StateIdleWithSprite : State
 // Good for animations such as walking.
 public class StatePlayAnimationForHeldKey : State
 {
-	PlayerControl pc;
+    player_control pc;
 	SpriteRenderer renderer;
 	KeyCode key;
 	Sprite[] animation;
@@ -113,7 +116,7 @@ public class StatePlayAnimationForHeldKey : State
 	float animation_start_time;
 	int fps;
 	
-	public StatePlayAnimationForHeldKey(PlayerControl pc, SpriteRenderer renderer, Sprite[] animation, int fps, KeyCode key)
+	public StatePlayAnimationForHeldKey(player_control pc, SpriteRenderer renderer, Sprite[] animation, int fps, KeyCode key)
 	{
 		this.pc = pc;
 		this.renderer = renderer;
@@ -138,27 +141,33 @@ public class StatePlayAnimationForHeldKey : State
 
 		if(this.animation_length <= 0)
 		{
-			Debug.LogError("Empty animation submitted to state machine!");
+			//Debug.LogError("Empty animation submitted to state machine!");
 			return;
 		}
 		
 		// Modulus is necessary so we don't overshoot the length of the animation.
 		int current_frame_index = ((int)((Time.time - animation_start_time) / (1.0 / fps)) % animation_length);
 		renderer.sprite = animation[current_frame_index];
-		
-		// If another key is pressed, we need to transition to a different walking animation.
-		if(Input.GetKeyDown(KeyCode.DownArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_down, 6, KeyCode.DownArrow));
-		else if(Input.GetKeyDown(KeyCode.UpArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_up, 6, KeyCode.UpArrow));
-		else if(Input.GetKeyDown(KeyCode.RightArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_right, 6, KeyCode.RightArrow));
-		else if(Input.GetKeyDown(KeyCode.LeftArrow))
-			state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_left, 6, KeyCode.LeftArrow));
-		
-		// If we detect the specified key has been released, return to the idle state.
-		else if(!Input.GetKey(key))
-			state_machine.ChangeState(new StateIdleWithSprite(pc, renderer, animation[1]));
+
+        // If another key is pressed, we need to transition to a different walking animation.
+        if (pc.current_direction == Direction.SOUTH)
+        {
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_down, 6, KeyCode.DownArrow));
+            //Debug.Log("Another key pressed; transition to down walking");
+        }
+        else if (pc.current_direction == Direction.NORTH)
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_up, 6, KeyCode.UpArrow));
+        else if (pc.current_direction == Direction.EAST)
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_right, 6, KeyCode.RightArrow));
+        else if (pc.current_direction == Direction.WEST)
+            state_machine.ChangeState(new StatePlayAnimationForHeldKey(pc, renderer, pc.link_run_left, 6, KeyCode.LeftArrow));
+
+        // If we detect the specified key has been released, return to the idle state.
+        else if (!Input.GetKey(key))
+        {
+            state_machine.ChangeState(new StateIdleWithSprite(pc, renderer, animation[1]));
+            Debug.Log("Key released. Returning to Idle State");
+        }
 	}
 }
 
